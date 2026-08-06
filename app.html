@@ -1945,10 +1945,11 @@
         const container = document.getElementById("supplement-list-container");
         if (!container) return;
         const isEn = (currentLang === "en");
-        const activePartnerForList = (activePartnerIndex !== -1) ? linkedPartners[activePartnerIndex] : null;
-        const activePartnerGenderResolved = activePartnerForList ? (activePartnerForList.partnerGender || (("age" in activePartnerForList) ? "M" : "F")) : null;
-        const maleInvolved = (currentUser.gender === "M") || (activePartnerGenderResolved === "M");
-        const products = maleInvolved ? AD_DATA.supplement_male : AD_DATA.supplement_female;
+        // ⚠️ 광고 노출은 반드시 '본인 성별(currentUser.gender)' 기준으로만 분기한다.
+        //    파트너 성별을 함께 보면(예: maleInvolved) 여성 사용자가 남성 파트너를 연결한 경우
+        //    여성에게 남성용 광고가 노출되는 오류가 발생한다.
+        const myGender = (currentUser && currentUser.gender === "F") ? "F" : "M";
+        const products = (myGender === "F") ? AD_DATA.supplement_female : AD_DATA.supplement_male;
         if (!products || !products.length) { container.innerHTML = ""; return; }
         container.innerHTML = products.map((p, i) => {
             return '<div class="supplement-card"' + (i === products.length - 1 ? ' style="margin-bottom:0;"' : '') + '>' +
